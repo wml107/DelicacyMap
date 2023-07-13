@@ -1,0 +1,253 @@
+/**index.wxss**/
+#nav{
+  background-color: white;
+  display: flex;
+  position: fixed;
+  top: 40px;
+  flex-direction: row;
+  z-index: 10;
+}
+#sliderContainer{
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  width: 750rpx;
+  height: 50px;
+  z-index: 100;
+  background-color: white;
+}
+#sliderContainer>view{
+  width: 250rpx;
+  height: 40rpx;
+  text-align: center;
+  line-height: 50rpx;
+  font-size: 15px;
+}
+#priceFilterChoose{
+  width: 450rpx;
+  margin-left: 5rpx;
+  margin-top: 6rpx;
+}
+/* #filterCity{
+  width: 250rpx !important;
+  line-height: 50px;
+  text-align: center;
+  background-color: white;
+} */
+#filterLabel{
+  width: 750rpx !important;
+}
+.van-dropdown-menu{
+  display: block;
+}
+.van-nav-bar{
+  padding:  0 !important;
+}
+#statistics{
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  bottom: 50rpx;
+  left: 50rpx;
+  color: #1989fa;
+  font-size: 30rpx;
+}
+#addMarkerBtn{
+  display: block;
+  position: fixed;
+  bottom: 50rpx;
+  right: 140rpx;
+  z-index: 10;
+}
+#manageBtn{
+  display: block;
+  position: fixed;
+  bottom: 50rpx;
+  right: 50rpx;
+  z-index: 10;
+}
+#manageBind{
+  margin-top: 20rpx;
+  margin-bottom: 130rpx;
+}
+#manage{
+  margin-top: 6vh;
+  height: 94vh;
+  width: 550rpx;
+  z-index: 1000;
+}
+#updateCuisineInput,#updateLabelInput,#updateAnnouncementInput{
+  text-align: center;
+  margin: 35rpx 0 60rpx 0;
+  height: 70rpx;
+  line-height: 70rpx;
+  font-size: 30rpx;
+  width: 80%;
+  margin-left: 10%;
+  border: gainsboro 2rpx solid;
+  border-radius: 15rpx;
+}
+#updateAnnouncementInput{
+  height: 500rpx;
+  padding: 30rpx 30rpx;
+  text-align: start;
+  box-sizing: border-box;
+}
+#addMarker, #updateMarker, #markerDetail{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 750rpx;
+  padding: 55rpx 0 65rpx 0;
+  border-radius: 10px !important;
+  overflow:hidden !important;
+  transform: rotate(0deg);
+  z-index: 100;
+  background-color: #F5F5F5;
+  max-height: 86vh;
+  overflow: scroll !important;
+}
+#addMarker, #updateMarker{
+  max-height: 78vh;
+}
+#addMarker>view, #updateMarker>view{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 90%;
+  height: 70rpx;
+  margin: 0rpx;
+  padding: 2rpx 0;
+  background-color: white;
+}
+#addMarker>view>label, #updateMarker>view>label{
+  width: 43%;
+  margin-left: 7%;
+  text-align: start;
+  height: 55rpx;
+  line-height: 55rpx;
+}
+#addName, #updateName, #addAddress, #updateAddres{
+  height: auto !important;
+}
+#addName>label, #updateName>label{
+  width: 15% !important;
+  height: auto !important;
+}
+#addName>button, #updateName>button{
+  width: 69% !important;
+  height: auto !important;
+  background: none !important;
+  padding: 7rpx 0 !important;
+  text-align: right !important;
+}
+#addAddress>label, #updateAddress>label{
+  height: auto !important;
+  width: 84% !important;
+  padding-top: 10rpx !important;
+  padding-bottom: 17rpx !important;
+  text-align: justify !important;
+  line-height: 1.3 !important;
+  color: #8C99A0;
+}
+#addMarker>view>input, #addMarker>view>picker, #addMarker>view>button, #addMarker>view>textarea,
+#updateMarker>view>input, #updateMarker>view>picker, #updateMarker>view>button, #updateMarker>view>textarea{
+  width: 41%;
+  height: 50rpx;
+  line-height: 50rpx;
+  margin: 0;
+  padding: 0px;
+  font-size: 30rpx;
+  box-sizing: border-box;
+  text-align: center;
+	background: 
+    linear-gradient(#969799, #969799) left top,
+    linear-gradient(#969799, #969799) top left,
+	  linear-gradient(#969799, #969799) right bottom,
+	  linear-gradient(#969799, #969799) bottom right;
+	background-size: 10% 1.5px, 1.5px 40%;
+  background-repeat: no-repeat;
+  border-radius: 5px;
+}
+#addPriceDetail, #updatePriceDetail, #addDetail, #updateDetail, #addRecommend, #updateRecommend{
+  background: white !important;
+  border-radius: 10px !important;
+  width: 90% !important;
+  margin-bottom: 25rpx !important;
+  height: 144rpx !important;
+  padding: 20rpx 7%;
+  box-sizing: border-box;
+  text-align: left !important;
+}
+#addDetail, #updateDetail{
+  height: 214rpx !important;
+}
+.br{
+  height: 2px !important;
+  width: 90% !important;
+  background-color: white !important;
+}
+.br>view{
+  height: 2px;
+  margin-left: 5%;
+  width: 90%;
+  background-color: #F5F5F5 !important;
+}
+#addPic, #updatePic{
+  height: auto !important;
+  border-radius: 10px !important;
+  padding: 27rpx 0 0 7% !important;
+  box-sizing: border-box !important;
+}
+.van-uploader__wrapper{
+  flex-direction: row !important;
+  justify-content: flex-start;
+  align-items: center !important;
+}
+.van-uploader__upload, .van-uploader__preview{
+  margin: 0 !important;
+  margin-right: 27rpx !important;
+  margin-bottom: 27rpx !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+.van-uploader__preview-delete, .van-uploader__preview-delete:after, .van-uploader__preview-delete-icon{
+  height: 19px !important;
+  width: 19px !important;
+}
+/* .van-bottom-enter-to{
+  border-radius: 10px 10px 0 0;
+} */
+#markerDetail{
+  background: white !important;
+  overflow: hidden;
+  padding-top: 10rpx;
+}
+#markerDetail>swiper{
+  width: 750rpx;
+  height: 422rpx;
+}
+swiper-item{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+swiper-item>image{
+  width: 100%;
+  height: 100%;
+}
+#cuisine{
+  display: flex;
+  flex-direction: row;
+}
+.markerPic{
+  position: top;
+}
+van-cell-group{
+  width: 750rpx;
+}
+#van-dialog{
+  z-index: 10000;
+}

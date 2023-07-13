@@ -1,0 +1,51 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "backgroundColor": "#F6F6F6",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F6F6F6",
+    "navigationBarTitleText": "",
+    "navigationBarTextStyle": "black"
+  },
+  "sitemapLocation": "sitemap.json",
+  "cloud": true,
+  "plugins": {
+    "citySelector": {
+      "version": "1.0.2",
+      "provider": "wx63ffb7b7894e99ae"
+    },
+    "chooseLocation": {
+      "version": "1.0.10",
+      "provider": "wx76a9a06e5b4e693e"
+    },
+    "routePlan": {
+      "version": "1.0.18",
+      "provider": "wx50b5593e81dd937a"
+    }
+  },
+  "usingComponents": {
+    "selector-component": "plugin://citySelector/selector-component",
+    "van-dropdown-menu": "@vant/weapp/dropdown-menu/index",
+    "van-dropdown-item": "@vant/weapp/dropdown-item/index",
+    "van-icon": "@vant/weapp/icon/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-button": "@vant/weapp/button/index",
+    "van-dialog": "@vant/weapp/dialog/index",
+    "van-divider": "@vant/weapp/divider/index",
+    "van-uploader": "@vant/weapp/uploader/index",
+    "van-nav-bar": "@vant/weapp/nav-bar/index",
+    "van-cell": "@vant/weapp/cell/index",
+    "van-cell-group": "@vant/weapp/cell-group/index",
+    "van-tag": "@vant/weapp/tag/index"
+  },
+  "permission": {
+    "scope.userFuzzyLocation": {
+      "desc": "你的位置信息将用于小程序定位"
+    },
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序定位"
+    }
+  }
+}

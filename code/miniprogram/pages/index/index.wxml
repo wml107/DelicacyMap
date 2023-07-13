@@ -1,0 +1,328 @@
+<!--index.wxml-->
+<view class="container">
+  <!-- filter-价格选择器 -->
+  <view id="sliderContainer">
+    <view>人均：{{avgPriceRange[0]}}-{{avgPriceRange[1]}}</view>
+    <van-slider id="priceFilterChoose" value="{{ avgPriceRange }}" range max="999" min="0" step="1" bind:change="sliderChange" />
+  </view>
+  <!-- filter -->
+  <view id="nav">
+    <!-- 计算属性-选项生成 -->
+    <wxs module="opt">
+      var cuisine = function (cuisine) {
+        var temp = [{ text: '全部菜系', value: 0 }];
+        for (var i = 0; i < cuisine.length; i++) {
+          temp.push({ text: cuisine[i].name, value: cuisine[i]._id });
+        }
+        return temp;
+      }
+      var label = function (label) {
+        var temp = [{ text: '全部类型', value: 0 }];
+        for (var i = 0; i < label.length; i++) {
+          temp.push({ text: label[i].name, value: label[i]._id });
+        }
+        return temp;
+      }
+      var city = function (city) {
+        var temp = [];
+        for (var i = 0; i < city.length; i++) {
+          temp.push({
+            text: city[i].city.fullname.substring(0, city[i].city.fullname.length - 1),
+            value: i
+          });
+        }
+        return temp;
+      }
+      var markerList = function (marker) {
+        var temp = [];
+        for (var i = 0; i < marker.length; i++) {
+          temp.push({
+            id: i,
+            joinCluster: true,
+            latitude: marker[i].location.latitude,
+            longitude: marker[i].location.longitude,
+            callout: {
+              content: marker[i].avgPrice == 0 ? marker[i].location.name : marker[i].location.name + '\n￥' + marker[i].avgPrice,
+              display: "ALWAYS",
+              bgColor: '#ffffff',
+              padding: '7px',
+              fontSize: '28rpx',
+              borderRadius: '10rpx',
+              zIndex: i
+            },
+            iconPath: '../../image/location.png',
+            width: '67.5rpx',
+            height: '67.5rpx'
+          });
+        }
+        return temp;
+      }
+      module.exports = {
+        cuisine: cuisine,
+        label: label,
+        city: city,
+        markerList: markerList
+      }
+    </wxs>
+    <!-- 过滤器-下拉菜单 -->
+    <van-dropdown-menu style="width: 100vw;" slot="title" id="filterLabel" active-color="#1989fa">
+      <van-dropdown-item value="{{ selectedCuisine }}" options="{{ opt.cuisine(cuisine) }}" bind:change="cuisineChange" />
+      <van-dropdown-item value="{{ selectedLabel }}" options="{{ opt.label(label) }}" bind:change="labelChange" />
+      <van-dropdown-item value="{{ selectedCity }}" options="{{ opt.city(city) }}" bind:change="cityChange" />
+    </van-dropdown-menu>
+  </view>
+  <!-- map -->
+  <map id="map" longitude="{{defaultLongitude}}" latitude="{{defaultLatitude}}" scale="11" style="width: 100vw; height: 100vh;" markers="{{opt.markerList(marker)}}" bindmarkertap="markerDetail" bindcallouttap="markerDetail"></map>
+  <!-- 统计信息展示 -->
+  <view id="statistics">
+    <view id="users">浏览人数: {{statistics.users}}</view>
+    <text decode="true">&emsp;</text>
+    <view id="views">浏览量: {{statistics.views}}</view>
+  </view>
+  <!-- 新增标记 -->
+  <!-- 新增标记-开启按钮 -->
+  <van-icon wx:if="{{permission == 0}}" name="add-o" id="addMarkerBtn" size="75rpx" color="#1989fa" bindtap="showAddMarker" />
+  <!-- 新增标记-弹出层表单 -->
+  <van-popup position="bottom" show="{{ addMarker }}" wx:if="{{permission == 0}}" bind:close="closeAddMarker" safe-area-inset-bottom="{{false}}" safe-area-inset-top="{{true}}" round>
+    <!-- 新增标记-计算属性 -->
+    <wxs module="opt2">
+      var cuisine = function (cuisine) {
+        var temp = [{ text: '暂不设置', value: 0 }];
+        for (var i = 0; i < cuisine.length; i++) {
+          temp.push({ text: cuisine[i].name, value: cuisine[i]._id });
+        }
+        return temp;
+      }
+      var label = function (label) {
+        var temp = [{ text: '无', value: 0 }];
+        for (var i = 0; i < label.length; i++) {
+          temp.push({ text: label[i].name, value: label[i]._id });
+        }
+        return temp;
+      }
+      module.exports = {
+        cuisine: cuisine,
+        label: label
+      }
+    </wxs>
+    <van-nav-bar title="添加标记" left-text="返回" right-text="上传" left-arrow bind:click-left="closeAddMarker" bind:click-right="addMarker" />
+    <view id="addMarker">
+      <textarea style="flex-shrink: 0;" id="addDetail" maxlength='-1' model:value="{{addDetail}}" placeholder="评价..."></textarea>
+      <view style="flex-shrink: 0;" id="addName" style="border-radius: {{ addAddress !== null ? '10rpx 10rpx 0 0;' : '10rpx'}}">
+        <label for="locationInput">店名：</label>
+        <button id="locationInput" bindtap="chooseLocation">{{ addAddress !== null ? addAddress.name : '点击设置地址' }}</button>
+      </view>
+      <view style="flex-shrink: 0;" class="br" wx:if="{{addAddress !== null}}">
+        <view></view>
+      </view>
+      <view style="flex-shrink: 0;" wx:if="{{addAddress !== null}}" id="addAddress" style="border-radius: 0 0 10rpx 10rpx; height: auto;">
+        <label>{{ addAddress !== null ? addAddress.address : '' }}</label>
+      </view>
+      <view style="border-radius: 10rpx 10rpx 0 0;  margin-top: 25rpx; flex-shrink: 0;">
+        <label for="timeInput">时间：</label>
+        <picker id="timeInput" mode="date" start="1960-01-01" end="{{currentDate}}" model:value="{{addMarkerTime}}">{{addMarkerTime}}</picker>
+      </view>
+      <view style="flex-shrink: 0;" class="br">
+        <view></view>
+      </view>
+      <view style="flex-shrink: 0;">
+        <label for="cuisineInput">菜系：</label>
+        <picker id="cuisineInput" range="{{opt2.cuisine(cuisine)}}" range-key="text" model:value="{{addMarkerCuisine}}">{{opt2.cuisine(cuisine)[addMarkerCuisine].text}}</picker>
+      </view>
+      <view class="br" style="flex-shrink: 0;">
+        <view></view>
+      </view>
+      <view style="flex-shrink: 0;">
+        <label for="labelInput">标签：</label>
+        <picker id="LabelInput" range="{{opt2.label(label)}}" range-key="text" model:value="{{addMarkerLabel}}">{{opt2.label(label)[addMarkerLabel].text}}</picker>
+      </view>
+      <view class="br" style="flex-shrink: 0;">
+        <view></view>
+      </view>
+      <view style="border-radius: 0 0 10rpx 10rpx; margin-bottom: 25rpx; flex-shrink: 0;">
+        <label for="priceInput">人均: <text style="font-size: 22rpx">(不设置置0即可)</text></label>
+        <input id="priceInput" type="digit" model:value="{{addMarkerPrice}}" />
+      </view>
+      <textarea style="flex-shrink: 0;" id="addPriceDetail" maxlength='-1' model:value="{{addPriceDetail}}" placeholder="价格补充..."></textarea>
+      <textarea style="flex-shrink: 0;" id="addRecommend" maxlength='-1' model:value="{{addRecommend}}" placeholder="推荐菜..."></textarea>
+      <view style="flex-shrink: 0;" id="addPic">
+        <van-uploader file-list="{{ addPic }}" preview-size="175rpx" multiple="{{true}}" image-fit="aspectFill" bind:after-read="uploadPic" bind:delete="delPic" />
+      </view>
+    </view>
+  </van-popup>
+  <!-- 编辑标记 -->
+  <!-- 编辑标记-弹出层表单 -->
+  <van-popup position="bottom" z-index="1000" show="{{ updateMarker }}" wx:if="{{permission == 0}}" bind:close="closeUpdateMarker" safe-area-inset-bottom="{{false}}" safe-area-inset-top="{{true}}" round>
+    <van-nav-bar title="编辑标记" left-text="取消" right-text="确认" left-arrow bind:click-left="closeUpdateMarker" bind:click-right="markerUpdate" />
+    <view id="updateMarker">
+      <textarea style="flex-shrink: 0;" id="updateDetail" maxlength='-1' bindinput="updateDetailChange" value="{{updateDetail}}" placeholder="评价..."></textarea>
+      <view style="flex-shrink: 0;" id="updateName" style="border-radius: {{ updateAddress !== null ? '10rpx 10rpx 0 0;' : '10rpx'}}">
+        <label for="locationInput">店名：</label>
+        <button id="locationInput" bindtap="chooseLocation">{{ updateAddress !== null ? updateAddress.name : '点击设置地址' }}</button>
+      </view>
+      <view style="flex-shrink: 0;" class="br" wx:if="{{updateAddress !== null}}">
+        <view></view>
+      </view>
+      <view style="flex-shrink: 0;" wx:if="{{updateAddress !== null}}" id="updateAddress" style="border-radius: 0 0 10rpx 10rpx; height: auto;">
+        <label>{{ updateAddress !== null ? updateAddress.address : '' }}</label>
+      </view>
+      <view style="border-radius: 10rpx 10rpx 0 0;  margin-top: 25rpx; flex-shrink: 0;">
+        <label for="timeInput">时间：</label>
+        <picker id="timeInput" mode="date" start="1960-01-01" end="{{currentDate}}" model:value="{{updateMarkerTime}}">{{updateMarkerTime}}</picker>
+      </view>
+      <view style="flex-shrink: 0;" class="br">
+        <view></view>
+      </view>
+      <view style="flex-shrink: 0;">
+        <label for="cuisineInput">菜系：</label>
+        <picker id="cuisineInput" range="{{opt2.cuisine(cuisine)}}" range-key="text" model:value="{{updateMarkerCuisine}}">{{opt2.cuisine(cuisine)[updateMarkerCuisine].text}}</picker>
+      </view>
+      <view class="br" style="flex-shrink: 0;">
+        <view></view>
+      </view>
+      <view style="flex-shrink: 0;">
+        <label for="labelInput">标签：</label>
+        <picker id="LabelInput" range="{{opt2.label(label)}}" range-key="text" model:value="{{updateMarkerLabel}}">{{opt2.label(label)[updateMarkerLabel].text}}</picker>
+      </view>
+      <view class="br" style="flex-shrink: 0;">
+        <view></view>
+      </view>
+      <view style="border-radius: 0 0 10rpx 10rpx; margin-bottom: 25rpx; flex-shrink: 0;">
+        <label for="priceInput">人均: <text style="font-size: 22rpx">(不设置置0即可)</text></label>
+        <input id="priceInput" type="digit" model:value="{{updateMarkerPrice}}" />
+      </view>
+      <textarea style="flex-shrink: 0;" id="updatePriceDetail" maxlength='-1' bindinput="updatePriceDetailChange" value="{{updatePriceDetail}}" placeholder="价格补充..."></textarea>
+      <textarea style="flex-shrink: 0;" id="updateRecommend" maxlength='-1' bindinput="updateRecommendChange" value="{{updateRecommend}}" placeholder="推荐菜..."></textarea>
+      <view style="flex-shrink: 0;" id="updatePic">
+        <van-uploader file-list="{{ updatePic }}" preview-size="175rpx" multiple="{{true}}" image-fit="aspectFill" bind:after-read="uploadEditPic" bind:delete="delEditPic" />
+      </view>
+    </view>
+  </van-popup>
+  <!-- 标记详情-弹出层展示 -->
+  <van-popup position="bottom" show="{{ showMarker }}" bind:close="closeMarker" safe-area-inset-bottom="{{false}}" safe-area-inset-top="{{true}}" round>
+    <!-- 标记详情-计算属性 -->
+    <wxs module="tagName">
+      var cuisineName = function (id, cuisine) {
+        for (var i = 0; i < cuisine.length; i++) {
+          if (cuisine[i]._id == id) return cuisine[i].name;
+        }
+      }
+      var labelName = function (id, label) {
+        for (var i = 0; i < label.length; i++) {
+          if (label[i]._id == id) return label[i].name;
+        }
+      }
+      module.exports = {
+        cuisineName: cuisineName,
+        labelName: labelName
+      }
+    </wxs>
+    <view id="markerDetail">
+      <van-nav-bar style="width: 100%; flex-shrink: 0;" title="{{marker[markerNow].location.name}}" bind:click-left="markerDel" bind:click-right="showUpdateMarker" border="{{false}}">
+        <van-icon wx:if="{{permission === 0}}" name="delete-o" slot="left" color="#1989fa" size="50rpx" />
+        <van-icon wx:if="{{permission === 0}}" name="edit" slot="right" color="#1989fa" size="50rpx" />
+      </van-nav-bar>
+      <swiper style="flex-shrink: 0;" wx:if="{{marker[markerNow].picUrl.length != 0}}" indicator-dots="{{true}}" autoplay="{{true}}" circular="{{true}}" interval="4000" duration="500">
+        <swiper-item wx:for="{{marker[markerNow].picUrl}}" wx:key="index">
+          <image class="markerPic" src="{{item.url}}" mode="aspectFit" bindtap='bigPic' data-url="{{item.url}}"></image>
+        </swiper-item>
+      </swiper>
+      <image src="../../image/defaultPic.png" mode="aspectFit" wx:else="{{marker[markerNow].picUrl.length == 0}}"></image>
+      <van-cell-group style="flex-shrink: 0;" border="{{false}}">
+        <van-cell style="flex-shrink: 0;" title="店名" value="{{marker[markerNow].location.name}}" label="{{marker[markerNow].location.address}}" />
+        <van-cell style="flex-shrink: 0;" wx:if="{{marker[markerNow].cuisineId[0] != 0 || marker[markerNow].labelId[0] != 0}}">
+          <view id="cuisine" slot="title" wx:if="{{marker[markerNow].cuisineId[0] != 0}}">
+            <view class="van-cell-text">菜系：</view>
+            <van-tag type="primary" size="medium">{{tagName.cuisineName(marker[markerNow].cuisineId[0], cuisine)}}</van-tag>
+          </view>
+          <view slot="right-icon" wx:if="{{marker[markerNow].labelId[0] != 0}}">
+            <van-tag type="success" size="medium">{{tagName.labelName(marker[markerNow].labelId[0], label)}}</van-tag>
+          </view>
+        </van-cell>
+        <van-cell is-link title="导航路线" bind:click="navigator" />
+        <van-cell border="{{marker[markerNow].detail != '' || marker[markerNow].avgPrice!=0 || marker[markerNow].recommend != ''}}" style="width: 100%; flex-shrink: 0;" title="时间" value="{{marker[markerNow].time}}" />
+        <van-cell wx:if="{{marker[markerNow].recommend != ''}}" border="{{marker[markerNow].detail != '' || marker[markerNow].avgPrice!=0}}" style="width: 100%; flex-shrink: 0;" title="推荐菜：" value="{{marker[markerNow].recommend}}" />
+        <van-cell wx:if="{{marker[markerNow].avgPrice!=0}}" border="{{marker[markerNow].detail != ''}}" style="width: 100%; flex-shrink: 0;" title="人均" value="{{marker[markerNow].avgPrice}}" label="{{marker[markerNow].priceDetail}}" />
+        <van-cell wx:if="{{marker[markerNow].detail != ''}}" border="{{false}}" style="width: 100%; flex-shrink: 0;" title="{{marker[markerNow].detail}}" />
+      </van-cell-group>
+    </view>
+  </van-popup>
+  <!-- 管理员界面 -->
+  <!-- 开启按钮 -->
+  <van-icon name="more-o" id="manageBtn" size="75rpx" color="#1989fa" bindtap="showManage" />
+  <!-- filter-默认城市选择器 -->
+  <selector-component show="{{selectorVisible}}" key="{{key}}" referer="{{referer}}" hotCitys="" bindselect="onSelectCity"></selector-component>
+  <!-- 管理员-账号验证/绑定 -->
+  <van-popup position="bottom" show="{{ manage }}" bind:close="closeManage" wx:if="{{permission == 1}}">
+    <view id="manageBind">
+      <van-cell-group>
+        <van-field model:value="{{ password }}" center clearable label="口令" placeholder="请输入口令" border="{{ false }}" size="large" use-button-slot>
+          <van-button slot="button" size="small" type="primary" bindtap="manageBind">
+            确认
+          </van-button>
+        </van-field>
+      </van-cell-group>
+    </view>
+  </van-popup>
+  <!-- 管理员-菜单 -->
+  <van-popup position="left" show="{{ manage }}" bind:close="closeManage" wx:else="{{permission == 0}}">
+    <view id="manage">
+      <van-collapse accordion value="{{ collapseName }}" bind:change="changeCollapse">
+        <van-collapse-item is-link="{{false}}" disable="true" title="修改默认城市 | {{city[defaultCityIndex].province.fullname == city[defaultCityIndex].city.fullname ? '' : city[defaultCityIndex].province.fullname + ' : ' }}{{city[defaultCityIndex].city.fullname}}" name="1">
+        </van-collapse-item>
+        <van-collapse-item title="菜系管理" name="2">
+          <van-cell-group>
+            <van-field model:value="{{ newCuisine }}" center clearable label="" placeholder="新增菜系" border="{{ false }}" use-button-slot>
+              <van-button slot="button" size="mini" type="primary" bindtap="addCuisine">
+                新增
+              </van-button>
+            </van-field>
+          </van-cell-group>
+          <van-cell-group wx:for="{{cuisine}}" wx:key="_id">
+            <van-field readonly value="{{ item.name }}" center clearable label="" border="{{ false }}" data-index="{{index}}" use-button-slot>
+              <van-button slot="button" size="mini" type="info" bindtap="updateCuisineDialog" data-index="{{index}}" style="margin-right: 20rpx;">
+                修改
+              </van-button>
+              <van-button slot="button" size="mini" type="danger" bindtap="delCuisine" data-index="{{index}}">
+                删除
+              </van-button>
+            </van-field>
+          </van-cell-group>
+        </van-collapse-item>
+        <van-collapse-item title="自定义标签" name="3">
+          <van-cell-group>
+            <van-field model:value="{{ newLabel }}" center clearable label="" placeholder="新增自定义标签" border="{{ false }}" use-button-slot>
+              <van-button slot="button" size="mini" type="primary" bindtap="addLabel">
+                新增
+              </van-button>
+            </van-field>
+          </van-cell-group>
+          <van-cell-group wx:for="{{label}}" wx:key="_id">
+            <van-field readonly value="{{ item.name }}" center clearable label="" border="{{ false }}" data-index="{{index}}" use-button-slot>
+              <van-button slot="button" size="mini" type="info" bindtap="updateLabelDialog" data-index="{{index}}" style="margin-right: 20rpx;">
+                修改
+              </van-button>
+              <van-button slot="button" size="mini" type="danger" bindtap="delLabel" data-index="{{index}}">
+                删除
+              </van-button>
+            </van-field>
+          </van-cell-group>
+        </van-collapse-item>
+        <van-collapse-item is-link="{{false}}" disable="true" title="公告" name="4">
+        </van-collapse-item>
+      </van-collapse>
+    </view>
+  </van-popup>
+
+  <!-- 对话框 -->
+  <van-dialog id="van-dialog" />
+  <van-dialog wx:if="{{dialogNow == 'cuisine'}}" use-slot title="编辑菜系" show="{{ showDialog }}" show-cancel-button bind:cancel="updateCuisineDialogClose" bind:confirm="updateCuisine">
+    <input id="updateCuisineInput" model:value="{{editCuisine}}" />
+  </van-dialog>
+  <van-dialog wx:elif="{{dialogNow == 'label'}}" use-slot title="编辑自定义标签" show="{{ showDialog }}" show-cancel-button bind:cancel="updateLabelDialogClose" bind:confirm="updateLabel">
+    <input id="updateLabelInput" model:value="{{editLabel}}" />
+  </van-dialog>
+  <van-dialog wx:else="{{dialogNow == 'announcement'}}" use-slot title="编辑公告" show="{{ showDialog }}" show-cancel-button bind:cancel="updateAnnouncementClose" bind:confirm="updateAnnouncement">
+    <textarea id="updateAnnouncementInput" model:value="{{editAnnouncement}}" maxlength="-1" />
+  </van-dialog>
+</view>
